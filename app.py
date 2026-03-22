@@ -1,4 +1,4 @@
-# app.py
+
 import streamlit as st
 from real_time_detector import FileEventHandler, monitor_processes
 from watchdog.observers import Observer
