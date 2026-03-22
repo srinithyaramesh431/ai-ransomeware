@@ -1,23 +1,14 @@
 import pickle
 import os
 
-# Ensure correct path to model
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.join(BASE_DIR, "model.pkl")
+with open("model.pkl", "rb") as f:
+    model = pickle.load(f)
 
-# Load model
-if not os.path.exists(MODEL_PATH):
-    raise FileNotFoundError(f"Model file not found: {MODEL_PATH}")
-
-model = pickle.load(open(MODEL_PATH, "rb"))
-
-def predict_file(file_bytes):
-    """
-    Predicts if a file is ransomware.
-    Returns:
-        1 -> Ransomware
-        0 -> Safe
-    """
-    # Adapt preprocessing if needed
-    features = [file_bytes]
-    return model.predict([features])[0]
+def predict_file(file_path):
+    
+    size = os.path.getsize(file_path)
+    ext = os.path.splitext(file_path)[1]
+    ext_map = {".exe":1, ".dll":2, ".txt":3, ".pdf":4, ".docx":5, ".xlsx":6}
+    ext_feature = ext_map.get(ext.lower(), 0)
+    features = [size, ext_feature]
+    return model.predict([features])[0]  # 1 = suspicious / ransomware
