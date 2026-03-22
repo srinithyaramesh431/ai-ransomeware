@@ -1,32 +1,21 @@
 import streamlit as st
-from detector import predict_file  # import function from detector.py
+import pickle
 
-# -------------------------
-# UI
-# -------------------------
-st.set_page_config(page_title="AI Ransomware Detector", layout="centered")
 st.title("🔐 AI Ransomware Detector")
-st.subheader("Upload a file to check if it is ransomware")
 
 # File upload
-uploaded_file = st.file_uploader(
-    "Choose a file",
-    type=["txt", "exe", "py", "docx", "pdf"]
-)
+uploaded_file = st.file_uploader("Upload a file to check", type=["txt","exe","py"])  
 
 if uploaded_file is not None:
-    try:
-        # Read file bytes
-        file_bytes = uploaded_file.read()
+    # Load model
+    model = pickle.load(open("model.pkl", "rb"))
 
-        # Call detector
-        result = predict_file(file_bytes)
+    # For example, model expects bytes or features
+    # This is just pseudo code
+    data = uploaded_file.read()
+    result = model.predict([data])
 
-        # Show result
-        if result == 1:
-            st.error("⚠️ Ransomware Detected!")
-        else:
-            st.success("✅ File is Safe!")
-
-    except Exception as e:
-        st.error(f"Error processing file: {e}")
+    if result[0] == 1:
+        st.error("⚠️ Ransomware Detected!")
+    else:
+        st.success("✅ File is Safe!")
