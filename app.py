@@ -1,24 +1,21 @@
 import streamlit as st
-import pandas as pd
+import pickle
 
-st.title("🛡️ AI Ransomware Detection Dashboard")
+st.title("🔐 AI Ransomware Detector")
 
-try:
-    df = pd.read_csv("data1.csv", header=None)
-    count = len(df)
+# File upload
+uploaded_file = st.file_uploader("Upload a file to check", type=["txt","exe","py"])  
 
-    st.write("📊 Total Events:", count)
+if uploaded_file is not None:
+    # Load model
+    model = pickle.load(open("model.pkl", "rb"))
 
-    if count > 20:
-        st.error("⚠️ High Risk: Possible Ransomware Attack")
-    elif count > 10:
-        st.warning("⚠️ Suspicious Activity Detected")
+    # For example, model expects bytes or features
+    # This is just pseudo code
+    data = uploaded_file.read()
+    result = model.predict([data])
+
+    if result[0] == 1:
+        st.error("⚠️ Ransomware Detected!")
     else:
-        st.success("✅ System Normal")
-
-    st.subheader("📄 Activity Logs")
-    st.dataframe(df)
-
-except:
-    st.write("No data available yet.")
-    
+        st.success("✅ File is Safe!")
