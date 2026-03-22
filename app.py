@@ -1,23 +1,32 @@
 import streamlit as st
-import pandas as pd
+from detector import predict_file  # import function from detector.py
 
-st.title("🛡️ AI Ransomware Detection Dashboard")
+# -------------------------
+# UI
+# -------------------------
+st.set_page_config(page_title="AI Ransomware Detector", layout="centered")
+st.title("🔐 AI Ransomware Detector")
+st.subheader("Upload a file to check if it is ransomware")
 
-try:
-    df = pd.read_csv("data1.csv", header=None)
-    count = len(df)
+# File upload
+uploaded_file = st.file_uploader(
+    "Choose a file",
+    type=["txt", "exe", "py", "docx", "pdf"]
+)
 
-    st.write("📊 Total Events:", count)
+if uploaded_file is not None:
+    try:
+        # Read file bytes
+        file_bytes = uploaded_file.read()
 
-    if count > 20:
-        st.error("⚠️ High Risk: Possible Ransomware Attack")
-    elif count > 10:
-        st.warning("⚠️ Suspicious Activity Detected")
-    else:
-        st.success("✅ System Normal")
+        # Call detector
+        result = predict_file(file_bytes)
 
-    st.subheader("📄 Activity Logs")
-    st.dataframe(df)
+        # Show result
+        if result == 1:
+            st.error("⚠️ Ransomware Detected!")
+        else:
+            st.success("✅ File is Safe!")
 
-except:
-    st.write("No data available yet.")
+    except Exception as e:
+        st.error(f"Error processing file: {e}")
