@@ -1,21 +1,25 @@
+# app.py
 import streamlit as st
-import pickle
+from real_time_detector import FileEventHandler, monitor_processes
+from watchdog.observers import Observer
+import threading, os
 
-st.title("🔐 AI Ransomware Detector")
+st.title("Full System Ransomware Detection Dashboard")
 
-# File upload
-uploaded_file = st.file_uploader("Upload a file to check", type=["txt","exe","py"])  
+folder = st.text_input("Folder to Monitor", "C:/Users/Nithya/Documents")
 
-if uploaded_file is not None:
-    # Load model
-    model = pickle.load(open("model.pkl", "rb"))
+def start_monitoring(folder):
+    event_handler = FileEventHandler()
+    observer = Observer()
+    observer.schedule(event_handler, folder, recursive=True)
+    observer.start()
+    try:
+        while True:
+            monitor_processes()
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()
 
-    # For example, model expects bytes or features
-    # This is just pseudo code
-    data = uploaded_file.read()
-    result = model.predict([data])
-
-    if result[0] == 1:
-        st.error("⚠️ Ransomware Detected!")
-    else:
-        st.success("✅ File is Safe!")
+t = threading.Thread(target=start_monitoring, args=(folder,), daemon=True)
+t.start()
+st.success(f"Monitoring started for: {folder}")
