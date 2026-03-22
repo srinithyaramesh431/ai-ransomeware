@@ -1,27 +1,21 @@
-
-import pandas as pd
+import streamlit as st
 import pickle
-from llm_module import analyze_activity
 
-# load model
-with open("model.pkl", "rb") as f:
-    model = pickle.load(f)
+st.title("🔐 AI Ransomware Detector")
 
-# load data
-df = pd.read_csv("data1.csv", header=None)
+# File upload
+uploaded_file = st.file_uploader("Upload a file to check", type=["txt","exe","py"])  
 
-event_count = len(df)
+if uploaded_file is not None:
+    # Load model
+    model = pickle.load(open("model.pkl", "rb"))
 
-df['count'] = range(1, len(df)+1)
-X = df[['count']]
+    # For example, model expects bytes or features
+    # This is just pseudo code
+    data = uploaded_file.read()
+    result = model.predict([data])
 
-pred = model.predict(X)
-
-if -1 in pred:
-    print("⚠️ AI Detected Suspicious Activity")
-else:
-    print("✅ Normal Activity")
-
-# LLM analysis
-result = analyze_activity(event_count)
-print("LLM Analysis:", result)
+    if result[0] == 1:
+        st.error("⚠️ Ransomware Detected!")
+    else:
+        st.success("✅ File is Safe!")
