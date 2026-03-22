@@ -1,25 +1,23 @@
-
 import streamlit as st
-from real_time_detector import FileEventHandler, monitor_processes
-from watchdog.observers import Observer
-import threading, os
+import pandas as pd
 
-st.title("Full System Ransomware Detection Dashboard")
+st.title("🛡️ AI Ransomware Detection Dashboard")
 
-folder = st.text_input("Folder to Monitor", "C:/Users/Nithya/Documents")
+try:
+    df = pd.read_csv("data1.csv", header=None)
+    count = len(df)
 
-def start_monitoring(folder):
-    event_handler = FileEventHandler()
-    observer = Observer()
-    observer.schedule(event_handler, folder, recursive=True)
-    observer.start()
-    try:
-        while True:
-            monitor_processes()
-    except KeyboardInterrupt:
-        observer.stop()
-    observer.join()
+    st.write("📊 Total Events:", count)
 
-t = threading.Thread(target=start_monitoring, args=(folder,), daemon=True)
-t.start()
-st.success(f"Monitoring started for: {folder}")
+    if count > 20:
+        st.error("⚠️ High Risk: Possible Ransomware Attack")
+    elif count > 10:
+        st.warning("⚠️ Suspicious Activity Detected")
+    else:
+        st.success("✅ System Normal")
+
+    st.subheader("📄 Activity Logs")
+    st.dataframe(df)
+
+except:
+    st.write("No data available yet.")
